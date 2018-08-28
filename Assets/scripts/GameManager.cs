@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class GameManager : MonoBehaviour
@@ -15,6 +17,9 @@ public class GameManager : MonoBehaviour
     [Range(0, 100)]
     public int minePercent = 10;
 
+    public GameObject finishGamePopUp;
+    public Text finishGameResult;
+
     public Sprite vanilaSprite;
     public Sprite mineSprite;
     public Sprite freeSprite;
@@ -24,8 +29,15 @@ public class GameManager : MonoBehaviour
         MatrizInstance();
 	}
 
+    public void TryAgain()
+    {
+        MatrizInstance();
+    }
+
     void MatrizInstance()
     {
+        finishGamePopUp.SetActive(false);
+        
         if (cellMatrix == null)
         {
             cellMatrix = new Cell[dimension.x, dimension.y];
@@ -54,11 +66,29 @@ public class GameManager : MonoBehaviour
             return;
         cellMatrix[i, j].showed = true;
 
+        int cellsLeft = 0;
+
+        for (int k = 0; k < cellMatrix.GetLength(0); k++)
+        {
+            for (int l = 0; l < cellMatrix.GetLength(1); l++)
+            {
+                if (!cellMatrix[k, l].showed)
+                    cellsLeft++;
+            }
+        }
+
+        if (cellsLeft == minePercent)
+        {
+            finishGameResult.text = "Winner";
+            finishGamePopUp.SetActive(true);
+        }
+
         if (cellMatrix[i, j].mine)
         {
             // FAIL STATE
             cellMatrix[i, j].sprite = mineSprite;
-            MatrizInstance();
+            finishGameResult.text = "Loose";
+            finishGamePopUp.SetActive(true);
         }
         else
         {
